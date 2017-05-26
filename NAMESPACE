@@ -1,0 +1,79 @@
+useDynLib(CNVassoc)
+
+import(
+CNVassocData, 
+mixdist, 
+mclust, 
+survival
+)
+
+export(
+cnv,
+is.cnv,
+CNVassoc,
+CNVtest,
+getProbs,
+getProbsRegions,
+getPvalBH,
+getQualityScore,
+mixture,
+multiCNVassoc,
+simCNVdataBinary,
+simCNVdataNorm,
+simCNVdataCaseCon,
+simCNVdataPois,
+simCNVdataWeibull,
+plotSignal,
+fastCNVassoc,
+fastCNVinter
+)
+
+importFrom("graphics", "abline", "axis", "barplot", "layout", "legend", "lines", "locator", "par", "plot", "points", "polygon")
+
+importFrom("stats", "as.formula", "coef", "contrasts", "cor", "dbinom", "density", "dnorm", "dpois", "dweibull", "glm", "glm.control", "integrate", "logLik", "model.matrix", "model.response", "p.adjust", "p.adjust.methods", "pchisq", "pnorm", "printCoefmat", "pweibull", "qnorm", "rbinom", "rmultinom", "rnorm", "rpois", "rweibull", "sd")
+
+
+S3method(print, cnv)
+S3method(plot, cnv)
+
+S3method(anova, CNVassoc)
+S3method(logLik, CNVassoc)
+S3method(print, CNVassoc)
+S3method(summary, CNVassoc)
+S3method(print, anova.CNVassoc)
+S3method(print, summary.CNVassoc)
+
+S3method(print, QualityScore)
+S3method(getQualityScore, cnv)
+S3method(getQualityScore, default)
+
+S3method(print, CNVtest)
+
+S3method(getProbs, cghCall)
+S3method(getProbs, cnv)
+
+S3method(subset, cnv)
+
+# not exported:
+  # assocCNV.i
+  # classCNV
+  # EMlogistic
+  # EMnorm
+  # getQualityScoreDefault
+  # hessianLinear
+  # hessianLogistic
+  # linear.fit
+  # logistic.fit
+  # logLike.logistic
+  # logLike.norm
+  # matrix2vector
+  # mix
+  # NRlogistic
+  # NRnorm
+  # plot.cnv.intensities
+  # plot.cnv.norm
+  # vector2matrix
+  # is.quantitative
+  # getProbsRegions.i
+  # Others ...
+

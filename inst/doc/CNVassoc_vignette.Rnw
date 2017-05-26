@@ -1,0 +1,1072 @@
+\documentclass[11pt]{article}
+%\usepackage[authoryear,round]{natbib}
+\usepackage{hyperref}
+\usepackage[pdftex]{color,graphicx,epsfig}
+\DeclareGraphicsRule{.pdftex}{pdf}{.pdftex}{}
+\usepackage{amssymb,amsmath}
+%\usepackage[latin1]{inputenc}
+
+
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%\setkeys{Gin}{width=0.99\textwidth}
+
+\title{\bf CNVassoc: Association analysis of CNV data}
+
+\vspace{1cm}
+
+\author{Isaac Subirana\,$^{1,2,3}$, Juan R Gonzalez\,$^{4,2,1}$}
+
+
+%\VignetteIndexEntry{CNVassoc} 
+
+\maketitle
+
+\begin{center}
+
+$^{1}$CIBER Epidemiology and Public Health (CIBERESP)\\
+$^{2}$Municipal Institute for Medical Research (IMIM-Hospital del Mar)\\
+$^{3}$Statistics Department, University of Barcelona\\
+$^{4}$Center for Research in Environmental Epidemiology (CREAL)\\ 
+
+\vspace{1cm}
+
+\href{jrgonzalez@creal.cat}{jrgonzalez@creal.cat}
+\href{http://www.creal.cat/jrgonzalez/software.htm}{http://www.creal.cat/jrgonzalez/software.htm}
+
+\end{center}
+
+
+\tableofcontents
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+{\tt CNVassoc} allows users to perform association analysis between CNVs and disease incorporating
+uncertainty of CNV genotype. This document provides an overview on the usage of the {\tt CNVassoc} package.
+For more detailed information on the model and assumption please refer
+to article \cite{GonSubEsc09} and its supplementary material. We illustrate how to analyze CNV data by using some real data sets.
+The first data set belongs to a case-control study where peak intensities from MLPA assays were obtained for two different genes. 
+The second example corresponds to the Neve dataset \cite{NevChiFri06} that is available at Bioconductor. 
+The data consists of 50 CGH arrays of 1MB resolution for patients diagnosed with breast cancer. All datasets are available
+directly from the \texttt{CNVassoc} package. Finally, we show examples with Poisson and Weibull-distributed phenotypes\\
+
+
+\noindent Start by loading the package \texttt{CNVassoc}:
+
+
+<<echo=F>>=
+options(width=120)
+@
+
+<<echo=T>>=
+library(CNVassoc)
+@
+
+\noindent and some required libraries
+<<echo=T>>=
+library(xtable)
+@
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{CNV from a single probe} \label{section-CNV from a single probe}
+
+
+\subsection{The data}
+
+In order to illustrate how to assess association between CNV and disease, we use a data set including 360 cases and 291 controls. 
+Data is to be published soon as described in \cite{GonSubEsc09}. The data contains peaks intensities for two genes arising from an MLPA assay.
+Note that Illumina or Affymetrix data, where log2 ratios are available instead of peak intensities, 
+can be analyzed in the same way as we are illustrating.
+
+The MLPA data set contains case control status as well as two simulated covariates ({\tt quanti} and {\tt cov}) that have been generated 
+for illustrative purposes (e.g., association between a quantitative trait and CNV or how to adjust for covariates). 
+To load the MLPA data just type
+
+<<echo=T>>=
+data(dataMLPA)
+head(dataMLPA)
+@
+
+%
+% description of each of the variables of dataset %
+
+
+%% looking at signal distribution
+First, we look at the distribution of peak intensities for each of the two genes analyzed: see Figure \ref{fig-MLPAsignal}. 
+%
+
+
+Figure \ref{fig-MLPAsignal} shows the signals for Gene 1 and Gene 2. For both genes it is clear that there are
+3 clusters corresponding to 0, 1 and 2 copies. However, the three peaks for Gene 2 are not so well separated as those of Gene 1 (the underlying distributions overlap much more). This fact leads to more uncertainty when inferring the copy number status for each individual. This will be illustrated in the next section.
+
+\begin{figure}[ht]
+\begin{center}
+<<echo=F,fig=TRUE>>=
+par(mfrow=c(2,2),mar=c(3,4,3,1))
+hist(dataMLPA$Gene1,main="Gene 1 signal histogram",xlab="",ylab="frequency")
+hist(dataMLPA$Gene2,main="Gene 2 signal histogram",xlab="",ylab="frequency")
+par(xaxs="i")
+plot(density(dataMLPA$Gene1),main="Gene 1 signal density function",xlab="",ylab="density")
+plot(density(dataMLPA$Gene2),main="Gene 2 signal density function",xlab="",ylab="density")
+@
+\caption{\small Signal distributions for Gene 1 and Gene 2}
+\label{fig-MLPAsignal}
+\end{center}
+\end{figure}
+
+In the CNVassoc package, a function called \texttt{plotSignal} has been implemented to plot the peak intensities for a gene.
+To illustrate this, a plot of the intensities of Gene 2 for each individual, distinguishing between cases and controls, can be performed by typing (see figure \ref{fig-plotSignalcasecon}) 
+<<echo=T>>=
+plotSignal(dataMLPA$Gene2,case.control=dataMLPA$casco)
+@
+
+\begin{figure}[ht]
+\begin{center}
+<<echo=F,fig=TRUE>>=
+plotSignal(dataMLPA$Gene2,case.control=dataMLPA$casco)
+@
+\caption{\small Signal distribution for Gene 2 using \texttt{plotSignal}}
+\label{fig-plotSignalcasecon}
+\end{center}
+\end{figure}
+
+\noindent or, similarly but correlating the peak intensities with a quantitative phenotype (see figure \ref{fig-plotSignalquanti}) type
+<<echo=T>>=
+plotSignal(dataMLPA$Gene2, case.control = dataMLPA$quanti)
+@
+
+
+\begin{figure}[ht]
+\begin{center}
+<<echo=F,fig=TRUE>>=
+plotSignal(dataMLPA$Gene2,case.control=dataMLPA$quanti)
+@
+\caption{\small Signal distribution for Gene 2 using \texttt{plotSignal}}
+\label{fig-plotSignalquanti}
+\end{center}
+\end{figure}
+
+In figure \ref{fig-plotSignalquanti}, the quantitative phenotype is plotted on the x-axis, instead of distinguishing points by shape, as in figure \ref{fig-plotSignalcasecon}.\\
+
+
+Also, it is possible to specify the number of cutoff points and place them interactively via \texttt{locator} on the previous plot, 
+in order to infer the copy number status in a naive way. (More sophisticated ways of inferring copy number status will be dealt with in subsequent sections). To place 2 cutoff points, thereby defining 3 copy number status values or clusters,
+(note use of argument \texttt{n=2}) and store them as \texttt{cutpoints}:
+
+
+\begin{verbatim}
+\dontrun{
+cutpoints <- plotSignal(dataMLPA$Gene2, case.control = dataMLPA$casco, n = 2)
+}
+\end{verbatim}
+
+%savePlot("F:/CNVassoc_vignette/latex/figures/fig1.pdf",type="pdf") ## using pdf() locator doesn't work!!!!
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics{fig1.pdf}
+\caption{\small Signal distribution for Gene 2 using \texttt{plotSignal} once cutoff points have been set with \texttt{locator}}
+\label{fig-plotSignalcutoffs}
+\end{center}
+\end{figure}
+
+
+The plot generated in figure \ref{fig-plotSignalcutoffs}, is similar to that of \ref{fig-plotSignalcasecon}, but using colours to distinguish copy number status values inferred 
+from the cutoff points.\\
+
+In this example, the cutoff points have been placed at:
+
+<<echo=FALSE>>=
+cutpoints <- c(0.08470221, 0.40485249)
+@
+<<echo=TRUE>>=
+cutpoints
+@
+
+
+These stored cutoff points will be used in the following sections.
+
+
+
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Inferring copy number status from signal data}
+
+
+
+\subsubsection{From univariate signal intensity}
+
+%% cnv function using mixdist package %%
+
+The \texttt{cnv} function is used to infer the copy number status for each subject using the quantitative signal for an individual probe. 
+This signal can be obtained from any platform (MLPA, Illumina, $\ldots$).
+
+This function assumes a normal mixture model as other authors have proposed in the context of aCGH \cite{PicRobLeb07, vanKimVos07}. 
+It should be pointed out that in some instances, the intensity distributions (see Gene 1 in Figure \ref{fig-MLPAsignal}) for a null 
+allele are expected to be equal to 0. Due to experimental noise these intensities can deviate slightly from this theoretical value.
+ For these cases, the normal mixture model fails because the underlying distribution of individuals with 0 copies is not normal. 
+ In these situations we fit a modified mixture model (see \cite{GonSubEsc09} for further details).
+
+Figure \ref{fig-MLPAsignal} presents two different scenarios. For Gene 1 there are clearly three different status values,  but for Gene 2 the situation is not so clear.
+
+Function {\tt cnv} provides various arguments to cope with all these issues. The calling for Gene 1 can be done by executing
+
+
+<<echo=T>>=
+CNV.1 <- cnv(x = dataMLPA$Gene1, threshold.0 = 0.06, num.class = 3, 
+mix.method = "mixdist")
+@
+
+
+The argument {\tt threshold.0=0.06} indicates that individuals with peak intensities lower than 0.06 will have 0 copies. 
+Since there are three underlying copy number status values, we set argument {\tt num.class} to 3. 
+Argument {\tt mix.method} indicates what algorithm to use in estimating the normal mixture model. 
+{\tt "mixdist"} uses a combination of a Newton-type method and the EM algorithm implemented in the {\tt mixdist} library, 
+while {\tt "mclust"} uses the EM algotithm implemented in the {\tt Mclust} library.
+
+When the exact number of components for the mixture model is unknown (which may be the case for Gene 2), 
+the function uses the Bayesian Information Criteria (BIC) to select the number of components. This is performed when the argument 
+{\tt num.class} is missing. In this case the function estimates the mixture model admitting from 2 up to 6 copy number status values.
+%
+
+<<echo=T>>=
+CNV.2 <- cnv(x = dataMLPA$Gene2, threshold.0 = 0.01, mix.method = "mixdist")
+@
+
+%
+As we can see, the best model has a copy number status of 3. This result, obtained by using BIC, is as expected because we already know 
+that this gene has 0, 1 and 2 copies (see \cite{GonSubEsc09}).
+
+
+
+\subsubsection{From other algorithms}
+
+The result of applying function \texttt{cnv} is an object of class {\tt cnv} that, among other things, contains the posterior 
+probabilities matrix for each individual. This information is then used in the association analysis where the uncertainty is taken 
+into account. Posterior probabilities from any other calling algorithms can also be encapsulated in a {\tt cnv} object to be further 
+used in the analysis.
+
+To illustrate this, we will use the posterior probability matrix that has been computed when inferring copy number for Gene 2 by 
+using the normal mixture model. 
+This information is saved as an attribute for an object of class {\tt cnv}. A function called \texttt{getProbs} has been implemented to simplify accessing this attribute.
+Thus the probability matrix can be saved in an object \texttt{probs.2} like this:
+
+
+<<echo=T>>=
+probs.2 <- getProbs(CNV.2)
+@
+
+
+Imagine that \texttt{probs.2} contains posterior probabilities obtained from some calling algorithm such as CANARY (from PLINK) or 
+{\tt GCHcall} (this will be further illustrated in Section \ref{section-CNV from aCGH}). In this case, we create the object of class 
+{\tt cnv} that will be used in the association step by typing
+%
+
+<<echo=T>>=
+CNV.2probs <- cnv(probs.2)
+@
+
+
+%
+\subsubsection{From predetermined thresholds}
+
+Inferring copy number status for Gene 2 from previously specified threshold points (stored in vector \texttt{cutpoints}) can be done using
+the same \texttt{cnv} function but setting the argument \texttt{cutoffs} to \texttt{cutpoints}.
+
+<<echo=T>>=
+CNV.2th <- cnv(x = dataMLPA$Gene2, cutoffs = cutpoints)
+@
+
+Now, the inferred copy number object \texttt{CNV.2th} contains the same information as it would if it had been created directly from probabilities. 
+
+
+\subsection{Summarizing information} \label{subsection - Summarizing information}
+
+We have implemented two generic functions for an object of class {\tt cnv}. The generic {\tt print} function gives the results on 
+inferred copy number status. It includes the means, variances and proportions of copy number clusters as well as the p value corresponding 
+to the goodness-of-fit test for the selected number of classes.
+%% printing cnv object for gene 1 and gene 2.
+
+<<echo=T>>=
+CNV.1
+@
+
+%
+and for Gene 2
+%
+
+<<echo=T>>=
+CNV.2
+@
+
+%
+This report differs slightly when the object was created from only posterior probabilities:
+%
+
+<<echo=T>>=
+CNV.2probs
+@
+
+%
+Figure \ref{fig-MLPAcnv} shows the result of invoking the generic {\tt plot} function on these objects.
+%
+
+<<echo=T>>=
+pdf("fig2a.pdf")
+plot(CNV.1, case.control = dataMLPA$casco, main = "Gene 1")
+dev.off()
+pdf("fig2b.pdf")
+plot(CNV.2, case.control = dataMLPA$casco, main = "Gene 2")
+dev.off()
+@
+
+
+
+\begin{figure}[ht]
+\centering
+\begin{tabular}{|c|c|}\hline
+\begin{tabular}{c} \psfig{file=fig2a.pdf,width=2.5in,height=2.5in,clip=}  \end{tabular}
+ &  \begin{tabular}{c}
+\psfig{file=fig2b.pdf,width=2.5in,height=2.5in,clip=}
+ \end{tabular}
+ \\ \hline
+\end{tabular}
+\caption{\small Signal distribution by case control, and inferred number of copies}
+\label{fig-MLPAcnv}
+\end{figure}
+%
+%
+In figure \ref{fig-MLPAcnv} the signal is coloured by the inferred (most probable) copy number, while cases and controls are distinguished by shape. This last option is specified by the argument \texttt{case.control}. On the right side of the plot, 
+a density function of signal distribution is drawn. The p-value of goodness-of-fit test is the same as this described in 
+the beginning of this section. It indicates whether the assumed normal mixture model (with a given number of components) 
+is correct or not. Notice that for both genes the intensity data fits our the model well (goodness-of-fit p-values > 0.1).\\
+
+
+The action of {\tt plot} when only posterior probabilities are available gives a different result (Figure \ref{fig-MLPAcnvprob}). 
+Two barplots are created for cases and  controls (when argument \texttt{case.control} is used). Both are split by the copy 
+number frequency.
+
+
+
+\begin{figure}[ht]
+\begin{center}
+<<echo=F,fig=T>>=
+plot(CNV.2probs, case.control=dataMLPA$casco)
+@
+\caption{\small Estimated copy number frequencies for Gene 1 and Gene 2}
+\label{fig-MLPAcnvprob}
+\end{center}
+\end{figure}
+
+
+\clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Measuring uncertainty in inferring copy number status}
+
+
+The function \texttt{getQualityScore} uses information from an object of class {\tt cnv} to compute a value that indicates how much 
+the underlying copy number distribution (peak intensities) are mixed or overlapped. The more separated these peaks are (less uncertainty), 
+the larger the quality score is.
+
+Three measures of uncertainty are currently implemented. The first one is the same as that defined in the \texttt{CNVtools} package, the second
+is the estimated probabilty of good classification (PGC), and the third is defined as the the proportion of individuals with a confidence 
+score (described in \cite{canary}) bigger than 0.1. \\
+To choose PGC method type
+%
+
+<<echo=T>>=
+CNVassoc::getQualityScore(CNV.1, type = "class")
+CNVassoc::getQualityScore(CNV.2, type = "class")
+@
+
+%
+To choose the measure defined in the \texttt{CNVtools} package:
+%
+
+<<echo=T>>=
+CNVassoc::getQualityScore(CNV.1, type = "CNVtools")
+CNVassoc::getQualityScore(CNV.2, type = "CNVtools")
+@
+
+%
+And to choose the third measure:
+%
+
+<<echo=T>>=
+CNVassoc::getQualityScore(CNV.1, type = "CANARY")
+CNVassoc::getQualityScore(CNV.2, type = "CANARY")
+@
+
+
+%
+It is clear that in Gene 1 there is much less uncertainty, because the PGC is greater than 99\%, the measure of \texttt{CNVtools}
+package is higher than 25 (CNVtools recommends a quality score of 4 or larger), or the ''CANARY'' measure is almost 0.
+This fact can also be seen in Figure \ref{fig-MLPAcnv} where the underlying distributions of signal intensity are very well separated. 
+On the other hand, the PGC for Gene 2 is 91.3\%, and the \texttt{CNVtools} package value is about 3 indicating that more uncertainty 
+is present, and the ''CANARY'' type measure for Gene 2 tells that up to 30\% of individuals have a poor confidence score.
+When cnv object has been created directly from probabilities (obtained from any other calling algorithm), only {\tt type="CANARY"} method 
+can be computed. In \cite{Migen}, it is suggested that, when proportion of individuals with confidence score > 0.1 is greater than 10\%, 
+this particular CNV should be removed from the analysis under a best-guess strategy in performing the association test.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Assessing associations between CNV and disease}
+
+The function \texttt{CNVassoc} carries out association analysis between CNV and disease. This function incorporates calling uncertainty 
+by using a latent class model as described in \cite{GonSubEsc09}. The function can analyze both binary and quantitative traits. 
+In the first case, a linear regression is performed, and, in the second, a logistic regression. The regression model can be selected by using 
+the argument \texttt{case.control}. Nonetheless, the program automatically detects whether or not a quantitative trait is being analyzed so 
+it need not be specified.
+
+The function also allows the user to fit a model with additive or  multiplicative effects of CNV. This can be set through the argument 
+\texttt{model}. Possible values are "add" for an additive effect or "mul" for a multiplicative effect.
+
+The function \texttt{CNVassoc} returns an object of class {\tt CNVassoc}. This class of object has some properties in common with 
+objects of class {\tt glm}, such as \texttt{coef} or \texttt{summary} among others.
+
+
+%%%%%%%%%%%%%%%
+\subsubsection{Modelling association}
+
+The effect of a given CNV on case/control status (\texttt{casco} variable) can be fitted by typing
+
+
+<<echo=T>>=
+model1mul <- CNVassoc(casco ~ CNV.1, data = dataMLPA, model = "mul")
+model2mul <- CNVassoc(casco ~ CNV.2, data = dataMLPA, model = "mul")
+@
+
+
+
+%% printing the fitted model
+
+By default, a short summary is printed (similar to {\tt glm} objects)
+
+
+
+<<echo=T>>=
+model1mul
+@
+
+
+
+
+<<echo=T>>=                                                          
+model2mul
+@
+
+
+
+Note that the coefficients are a matrix with one row per variable and a  column for each distinct copy number status. In this model, 
+because there are no covariates and the CNV has a multiplicative effect, there is just one row (one intercept) and this is different 
+among columns (copy number status).
+
+
+By using the generic function {\tt summary} we can obtain a more exhaustive output. In particular the odds ratio and its confidence 
+intervals are printed as well as its p-value.
+
+
+
+<<echo=T>>=
+summary(model1mul)
+@
+
+
+
+
+
+<<echo=T>>=
+summary(model2mul)
+@
+
+
+By default, \texttt{CNVassoc} treats the response variable as a binary phenotype coded as 0/1. 
+Since \texttt{CNVassoc} can handle other distributions such as Poisson or Weibull, the \texttt{family} argument must be specified 
+when the response is not distributed as a bernoulli.
+For instance, to deal with a normally distributed response variable, specify \texttt{family="gaussian"}
+
+The following example presents the case of analyzing a quantitative normally distributed trait and adjusting the association by other covariates: 
+
+
+<<echo=T,keep.source=TRUE>>=
+mod <- CNVassoc(quanti ~ CNV.2 + cov, family = "gaussian", 
+data = dataMLPA, model = 'add', emsteps = 10)
+mod
+@
+
+
+
+Notice that in this case, we use new argument called {\tt emsteps}. This is necessary for computational reasons. Initially performing 
+some preliminary steps using the EM algorithm makes it easier to maximize the likelihood function using the Newton-Raphson procedure. 
+In general, it is enough to perform a few iterations (no more than 10). As usual, the model is then summarized by typing
+
+
+<<echo=T>>=
+summary(mod)
+@
+
+
+Remember that for quantitative traits we obtain mean differences instead of odds ratios.
+
+
+
+
+\subsubsection{Testing associations}
+
+In the previous analysis we obtained p values corresponding to the comparison between every copy number status versus the reference 
+(zero copies). Nonetheless, we are normally interested in testing the overall effect of CNV on disease. We have implemented the Wald test and the likelihood ratio test (LRT) to perform such omnibus testing. Both are available through the function \texttt{CNVtest}
+which requires an object of class {\tt CNVassoc} as the input. To specify the type of test, set the argument \texttt{type} 
+to \texttt{"Wald"} or \texttt{"LRT"}, respectively. For Gene 1,
+
+
+<<echo=T>>=
+CNVtest(model1mul, type = "Wald")
+CNVtest(model1mul, type = "LRT")
+@
+
+%
+and for Gene 2,
+%
+
+<<echo=T>>=
+CNVtest(model2mul, type = "Wald")
+CNVtest(model2mul, type = "LRT")
+@
+
+%
+Other generic functions like {\tt logLik}, {\tt coef}, {\tt summary} or {\tt update} can be applied to an object of class {\tt CNVassoc} 
+to get more information.
+
+For a multiplicative CNV effect model and for a binary traits, it is possible to change the reference category of copy number status. 
+This can be done by using the argument \texttt{ref} when executing the \texttt{summary} function. For example, if we want to one copy 
+as the reference category just type:
+
+
+<<echo=T>>=
+coef(summary(model1mul, ref = 2))
+@
+
+
+
+The same kind of results can be obtained if we assume an additive effect of CNV on the trait. In this case we need to set the 
+{\tt model} argument to {\tt "add"}
+
+
+<<echo=T>>=
+model2add <- CNVassoc(casco ~ CNV.2, data = dataMLPA, model = "add")
+model2add
+@
+
+
+Notice that under an additive CNV effect the structure of coefficients are different from the multiplicative CNV effect.
+Now there are two rows, one for intercept and the other one for the slope (change of risk in increasing by one copy). These two values 
+remain constant for every column (copy number status).
+
+% using summary
+
+<<echo=T>>=
+summary(model2add)
+@
+
+
+
+Finally, one might be interested in testing the additive effect. To do this, one can compare both additive and multiplicative models. 
+It is straightforward to see that the additive model is a particular case of the multiplicative one, and therefore the first is nested 
+in the second one.
+
+To compare two nested models we use the generic function {\tt anova} (NOTE: it is only implemented for comparing two models, both fitted with 
+the {\tt CNVassoc} function).
+
+
+<<echo=T>>=
+anova(model2mul, model2add)
+@
+
+
+The likelihood ratio test is performed. In this case the p-value is not significant, indicating that an additive CNV effect can be
+assumed. In any case, one should consider the power of this test before making conclusions.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{CNV from aCGH} \label{section-CNV from aCGH}
+
+The analysis of aCGH data requires taking additional steps into account, due to the dependency across probes and the fact that CNVs 
+are not measured with a unique probe. Table \ref{tab-stepsCGH} shows four steps we recommend for the analysis of this kind of data. 
+First, posterior probabilities should be obtained with an algorithm that considers probe correlation. We use, in particular, 
+the {\tt CGHcall} {\tt R} program which includes a mixture model to infer CNV status \cite{vanKimVos07}. Second, we build blocks/regions 
+of consecutive clones with similar signatures. To perform this step the {\tt CGHregions} {\tt R} library was used \cite{WieWie07}. 
+Third, the association between the CNV status of blocks and the trait is assessed by incorporating the uncertainty probabilities 
+in {\tt CNVassoc} function. And fourth, corrections for multiple comparisons must be performed. We use the Benjamini-Hochberg(BH) 
+correction \cite{BenHoc95}. 
+This is a widely used method for control of FDR that is robust in the scenarios commonly found in genomic data \cite{Reiner}.
+
+
+\begin{table}[ht]
+\begin{center}
+\caption{Steps to assess association between CNVs and traits for aCGH} \label{tab-stepsCGH}
+\begin{tabular}{l}
+\hline \hline
+{\bf Step 1}. Use any aCGH calling procedure that provides posterior \\  \hspace{1.4 cm} probabilities (uncertainty) ({\tt CGHcall}) \\
+{\bf Step 2}. Build blocks/regions of consecutive probes with similar \\ \hspace{1.4 cm} signatures ({\tt CGHregions}) \\
+{\bf Step 3}. Use the signature that occurs most in a block to perform \\ \hspace{1.4 cm} association({\tt multiCNVassoc}) \\
+{\bf Step 4}. Correct for multiple testing considering dependency \\ \hspace{1.4 cm} among signatures ({\tt getPvalBH}) \\
+\hline \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+To illustrate, we apply these steps to the breast cancer data studied by Neve et al. \cite{NevChiFri06}. The data consists of CGH arrays of 
+1MB resolution and is available from Bioconductor {\tt http://www.bioconductor.org/}. The authors chose the 50 samples that could 
+be matched to the name tokens of caArrayDB data (June 9th 2007). In this example the association between strogen receptor positivity 
+(dichotomous variable; 0: negative, 1: positive) and CNVs was tested. The original data set contained 2621 probes which were reduced 
+to 459 blocks after the application of {\tt CGHcall} and {\tt CGHregions} functions as we illustrate bellow.
+
+The data is saved in an object called {\tt NeveData}.  This object is a list with two components. The first component corresponds to 
+a dataframe containing 2621 rows and 54 columns with aCGH data (4 columns for the annotation and 50 log2ratio intensities). 
+The second component is a vector with the phenotype analyzed (strogen receptor posistivity). The data can be loaded as usual
+
+<<echo=T>>=
+data(NeveData)
+intensities <- NeveData$data
+pheno <- NeveData$pheno
+@
+
+%
+The calling can be performed using {\tt CGHcall} package by using the following instructions:
+%
+\begin{verbatim}
+\dontrun{
+######################################################
+### chunk number 1: Class of aCGH data
+######################################################
+library(CGHcall)
+Neve <- make_cghRaw(intensities)
+
+######################################################
+### chunk number 2: Preprocessing
+######################################################
+cghdata <- preprocess(Neve, maxmiss = 30, nchrom = 22)
+
+######################################################
+### chunk number 3: Normalization
+######################################################
+norm.cghdata <- normalize(cghdata, method = "median", smoothOutliers = TRUE)
+
+######################################################
+### chunk number 4: Segmentation
+######################################################
+seg.cghdata <- segmentData(norm.cghdata, method = "DNAcopy")
+
+######################################################
+### chunk number 5: Calling
+######################################################
+NeveCalled <- CGHcall(seg.cghdata, nclass = 3)
+NeveCalled <- ExpandCGHcall(NeveCalled, seg.cghdata)
+}
+\end{verbatim}
+%
+This process takes about 20 minutes, but to avoid wasting your time, we have saved the final object of class {\tt cghCall} that can be loaded as
+%
+
+<<echo=T>>=
+data(NeveCalled)
+@
+
+%
+We can then obtain the posterior probabilities. {\tt CGHcall} function does not estimates the underlying number of copies for each 
+segment but assigns the underlying status: loss, normal or gain. For each segment and for each individual we obtain three posterior 
+probabilities corresponding to each of these three statuses. This is done by executing
+%
+
+<<echo=T>>=
+probs <- getProbs(NeveCalled)
+@
+
+%
+This is a dataframe that looks like this:
+%
+
+<<echo=T>>=
+probs[1:5, 1:7]
+@
+
+%
+This table can be read as following. The probability that the  individual {\tt X600MOE} is normal for the signature \Sexpr{probs[1,1]} is \Sexpr{probs[1,6]}, while the probability of having a gain is \Sexpr{probs[1,7]} and \Sexpr{probs[1,5]} of having a loss.
+
+In order to determine the regions that are recurrent or common among samples, we use the {\tt CGHregions} function that takes an object 
+of class {\tt cghCall} (e.g. object {\tt NeveCalled} in our case). This algorithm reduces the initial table to a smaller matrix that 
+contains regions rather than individual probes. The regions consist of consequtive clones with similar signatures \cite{WieWie07}. 
+This can be done by executing
+%
+\begin{verbatim}
+\dontrun{
+library(CGHregions)
+NeveRegions <- CGHregions(NeveCalled)
+}
+\end{verbatim}
+%
+This process takes about 3 minutes. We have stored the result in the object {\tt NeveRegions} that can be loaded as usual
+%
+
+<<echo=T>>=
+data(NeveRegions)
+@
+
+%
+Now we have to get the posterior probabilities for each block/region. This can be done by typing
+%
+
+<<echo=T>>=
+probsRegions <- getProbsRegions(probs, NeveRegions, intensities)
+@
+
+%
+Finally, the association analysis between each region and the strogen receptor positivity can be analyzed by using the {\tt multiCNVassoc} 
+function. This function repeatedly calls {\tt CNVassoc} returning the p-value of association for each block/region
+%
+
+<<echo=T>>=
+pvals <- multiCNVassoc(probsRegions, formula = "pheno ~ CNV", model = "mult", 
+num.copies = 0:2, cnv.tol = 0.01)
+@
+
+%
+Notice that the arguments of {\tt multiCNVassoc} function are the same as those of {\tt CNVassoc}. In this example, we have set the 
+argument {\tt num.copies} equal to 0, 1, and 2 that corresponds to {\tt loss, normal, gain} status used in the {\tt CGHcall} function.
+
+Multiple comparisons can be addressed by using the Benjamini \& Hochberg approach \cite{BenHoc95}. The function {\tt getPvalBH} produces the FDR-adjusted p-values
+%
+
+<<echo=T>>=
+pvalsBH <- getPvalBH(pvals)
+head(pvalsBH)
+@
+
+%
+Table 6 in \cite{GonSubEsc09} can be obtained by typing
+%
+
+<<echo=T>>=
+cumsum(table(cut(pvalsBH[, 2], c(-Inf, 1e-5, 1e-4, 1e-3, 1e-2, 0.05))))
+@
+%
+
+
+
+\clearpage
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% SNP TEST DATA %%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Imputed data (SNPTEST format)}
+
+
+In this section we will show how \texttt{CNVassoc} can also be used to analyse SNP data when the SNPs have been imputed or
+genotyped with some degree of error. Notice that the same procedure can be applied to analyze data from Birdsuite/Canary software
+(developed by Broad Institute and available on \href{http://www.broadinstitute.org/}{http://www.broadinstitute.org/}).
+An example from SNPTEST software (available on \href{http://www.stats.ox.ac.uk/~marchini/software/gwas/snptest.html}
+{http://www.stats.ox.ac.uk/~marchini/software/gwas/snptest.html}) has been incorporated in the \texttt{CNVassoc} package, but
+in the same format as used by IMPUTE software (downloable from SNPTEST website). IMPUTE is a program to infer a set non 
+observed SNPs from other that have been genotyped, using linkage desequilibrium and other information, usually from the HapMap project
+(\href{http://snp.cshl.org/}{http://snp.cshl.org/}).
+The data of the following example can be downloaded freely from the SNPTEST software website, and consists of a set
+of 500 cases and 500 controls, and 100 SNPs. For all of the SNPs the probabilities of each genotype is given, not the genotype itself,
+simulating having been obtained from IMPUTE.  The names of the SNPs have been masked, as also the name of the disease. \\
+
+Let's load the data. There are 2 data frames, one for cases and the other for controls
+<<echo=TRUE>>=
+data(SNPTEST)
+dim(cases)
+dim(controls)
+@
+
+\normalsize
+<<echo=TRUE,results=hide>>=
+cases[1:10,1:11]
+@
+\scriptsize
+<<echo=FALSE>>=
+cases[1:10,1:11]
+@
+
+\normalsize
+<<echo=TRUE,results=hide>>=
+controls[1:10,1:11]
+@
+\scriptsize
+<<echo=FALSE>>=
+controls[1:10,1:11]
+@
+
+
+\normalsize
+The structure of the data is as follows:
+\begin{itemize}
+\item every row is a SNP
+\item the first 3 columns are the SNP identification codes,
+\item the 4th and 5th are the alleles.
+\item columns 6 through to the end provide the probabilities of each genotype, each group of 3 columns corresponds to one individual.
+
+\end{itemize}
+
+For example, the first individual in the data set of cases has probabilities of \Sexpr{round(cases[1,6],4)}, \Sexpr{round(cases[1,7],4)} and
+\Sexpr{round(cases[1,8],4)} of having the genotypes for the first SNP of \Sexpr{paste(cases[1,4],cases[1,4],sep="")},
+\Sexpr{paste(cases[1,4],cases[1,5],sep="")} and \Sexpr{paste(cases[1,5],cases[1,5],sep="")} respectively.
+And the second individual has a probabilities of \Sexpr{round(cases[2,9],4)}, \Sexpr{round(cases[2,10],4)} and
+\Sexpr{round(cases[2,11],4)} of having the genotypes for the second SNP of \Sexpr{paste(cases[2,4],cases[2,4],sep="")},
+\Sexpr{paste(cases[2,4],cases[2,5],sep="")} and \Sexpr{paste(cases[2,5],cases[2,5],sep="")} respectively.\\
+
+Of course, cases and controls must have the same number of rows, because the $i$-th row of cases and the $i$-th row of controls correspond
+to the same SNP.\\
+
+First in order to use \texttt{CNVassoc} certain preliminary data management steps are needed.
+The goal is to have one matrix of probabilities with 3 columns corresponding to the 3 genotypes and 1000 individuals (500 cases plus 500 controls),
+for each of the 100 SNPs.
+
+<<echo=TRUE>>=
+nSNP <- nrow(cases)
+probs <- lapply(1:nSNP, function(i) {
+  snpi.cases <- matrix(as.double(cases[i, 6:ncol(cases)]), ncol = 3,
+byrow = TRUE)
+  snpi.controls <- matrix(as.double(controls[i, 6:ncol(controls)]),
+ncol = 3, byrow = TRUE)
+  return(rbind(snpi.cases, snpi.controls))
+})
+@
+
+Now \texttt{probs} is a list of 100 components, each one containing the probability matrix of each SNP, and the first 500 rows of each matrix
+refers to the cases and the rest to the controls.
+
+In this point, we can use \texttt{multiCNVassoc} as shown in section \ref{section-CNV from aCGH}, to perform an association
+test of each SNP with case control status.
+But first, a casecontrol variable must be defined, which, in this example, will be a simple vector of 500 ones and 500 zeros.
+<<echo=TRUE>>=
+casecon <- rep(1:0, c(500, 500))
+@
+
+Now, we have the data ready to fit a model. For example, to compute the association p-value between every SNP and case control status
+assuming an additive effect:
+<<echo=TRUE>>=
+pvals <- multiCNVassoc(probs, formula = "casecon~CNV", model = "add",
+num.copies = 0:2, cnv.tol = 0.001)
+@
+
+And, as in section \ref{section-CNV from aCGH}, it is necessary to correct for multiple tests:
+<<echo=T>>=
+pvalsBH <- getPvalBH(pvals)
+head(pvalsBH)
+@
+
+A frecuency tabulation of how many SNP achieve different levels of significance is obtained by:
+<<echo=T>>=
+table(cut(pvalsBH[, 2], c(-Inf, 1e-3, 1e-2, 0.05, 0.1, Inf)))
+@
+
+From these results, no SNP appears to be associated with case control status.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Other phenotype distribution %%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Other phenotype distributions}
+
+
+The examples of the previous section dealt with continuous normally distributed phenotypes, and binary traits.
+However, there are situations where we may be interested in associating CNV with a phenotype that is not normally distributed,
+or which is not a binary trait.
+
+%%%%%%%%%%% poisson %%%%%%%%%%%
+\subsection{Poisson distributed phenotype}
+
+
+One example of a phenotype that doesn't fit with previous examples is a counting process, that could be the number of times that a patient
+replapses from a specific cancer. This could be modelled with a Poisson distribution.\\
+
+\texttt{CNVassoc} incorporates the possibility to fit a Poisson distribution by specifying \texttt{family}=''poisson''.
+Also,  \texttt{CNVassoc} has a function to simulate CNV data and Poisson phenotype.
+Therefore, in this section simulated data from this function will be analysed. \\
+
+Data for 4000 individuals has been simulated under the following scenario:
+\begin{itemize}
+\item CNV copy number of 0, 1 and 2 with probabilities of 0.25, 0.5 and 0.25 respectively,
+\item CNV intensity signal means of 0, 1 and 2 for 0, 1 and 2 copies respectively,
+\item CNV intensity signal standard deviation of 0.4 for each copy,
+\item an additive effect with a risk ratio of 1.7 for each increment in copy number status,
+\item incidence of 0.12 of relapsing among individuals with zero copies
+(which means a probability of \Sexpr{round(1-dpois(0,1.12),4)} of having at least one relapse).
+\end{itemize}
+<<echo=TRUE>>=
+set.seed(123456)
+rr <- 1.7
+incid0 <- 0.12
+lambda <- c(incid0, incid0 * rr, incid0 * rr^2)
+dsim <- simCNVdataPois(n = 4000, mu.surrog = 0:2, sd.surrog = rep(0.4, 3),
+w = c(0.25, 0.5, 0.25), lambda = lambda)
+head(dsim)
+@
+
+The result is a data frame with 3 variables, and as many rows as individuals. The description of these variables is:
+\begin{itemize}
+\item \texttt{resp}: response, distributed as a Poisson given the copy number status,
+\item \texttt{cnv}: the real copy number status, which, in practice, will be unknown and not considered in testing the association,
+\item \texttt{surrog}: the CNV intensity signal.
+\end{itemize}
+
+First an object of class \texttt{cnv} is obtained fitting a normal mixture to the intensity signal, as in section ...
+Note that to make the normal mixture converge ''mclust'' method is specified:
+<<echo=TRUE>>=
+CNV <- cnv(dsim$surrog, mix = "mclust")
+CNV
+@
+
+Then, an association model with CNV and the phenotype assuming an additive effect is performed as usual,
+but specifying \texttt{family="poisson"} in the call to function \texttt{CNVassoc}:
+<<echo=TRUE>>=
+fit <- CNVassoc(resp ~ CNV, data = dsim, family = "poisson", model = "add")
+coef(summary(fit))
+@
+
+The same generic functions are appliable as for normal and binary traits. Note that, now, \texttt{summary} prints ''RR'' instead of
+''OR''.
+
+We can compare this to the ''gold standard'' model, where the phenotype is regressed to the true copy number status:
+<<echo=TRUE>>=
+fit.gold <- glm(resp ~ cnv, data = dsim, family = "poisson")
+table.gold <- c(exp(c(coef(fit.gold)[2], confint(fit.gold)[2,])), 
+coef(summary(fit.gold))[2,4])
+names(table.gold) <- c("RR", "lower", "upper", "p-value")
+table.gold
+@
+
+The confidence interval of the estimate contains the true relative risk, and the ''gold standard'' model gives similar results as the one fitted
+using \texttt{CNVassoc} function (latent class model). \\
+
+
+Because the data has been simulated from a fixed scenario, we may be interested in comparing with an estimation made 
+under a naive strategy, i.e. compared to fitting a standard log-linear Poisson model assigning the most probable copy number to each individual (best
+guess approach):
+<<echo=TRUE>>=
+fit.naive <- glm(resp ~ CNV, data = dsim, family = "poisson")
+table.naive <- c(exp(c(coef(fit.naive)[2], confint(fit.naive)[2,])), 
+coef(summary(fit.naive))[2,4])
+names(table.naive) <- c("RR", "lower", "upper", "p-value")
+table.naive
+@
+
+To sum up, table \ref{table-compare} gives the relative risk estimated under different models (gold standard, latent class and naive):
+<<echo=FALSE,results=tex>>=
+taula <- rbind(
+table.gold[1:3],
+coef(summary(fit))[,c("RR","lower.lim","upper.lim")],
+table.naive[1:3])
+rownames(taula)<-c("Gold","LC","Naive")
+xtable(taula,"Comparison of RR estimated by the gold standard model, a latent class model (LC) and naive approach",label="table-compare")
+@
+
+
+%%%%%%%%%%% weibull %%%%%%%%%%%
+\subsection{Weibull distributed phenotype}
+
+
+Similarly to a Poisson distributed phenotype, we may be interested in fitting data that comes from a 
+followed cohort, where we want to estimate associations of time to death or onset of a particular disease with copy number 
+variant.
+Probably some individuals will be censored, i.e. at the end of follow-up they are alive or free 
+of disease.
+As for classical survival analysis is important to take into account these censored individuals 
+and not to remove them from the analysis.  \\
+
+
+Function \texttt{CNVassoc} can handle this situation, simply by specifying 
+\texttt{family}=''weibull'' rather than poisson or gaussian.
+In considering censoring status, function \texttt{Surv} must be invoked in the left hand term of
+the formula argument (as for \texttt{coxph} function for example).\\
+
+In this subsection we illustrate how to fit a model with time to event, possibly censored, by fitting simulated data, in a similar manner 
+to the previous subsection (Poisson distributed phenotype), and using function \texttt{simCNVdataWeibull} implemented in 
+the CNVassoc package.\\
+
+The following scenario has been simulated for 5000 individuals:
+\begin{itemize}
+\item CNV copy number of 0, 1 and 2 with probabilities of 0.25, 0.5 and 0.25 respectively,
+\item CNV intensity signal means of 0, 1 and 2 for 0, 1 and 2 copies respectively,
+\item CNV intensity signal standard deviation of 0.4 for each copy,
+\item an additive effect with a hazard ratio of 1.5 for each increment of copy number status
+\item shape parameter of the weibull distribution equal to one,
+\item disease incidence equal to 0.05 (per person-year) among the population with zero copies. 
+\item proportion of non-censored individuals (who suffered the disease during the study) of 10\%. 
+\end{itemize}
+<<echo=TRUE>>=
+set.seed(123456)
+n <- 5000
+w <- c(0.25, 0.5, 0.25)
+mu.surrog <- 0:2
+sd.surrog <- rep(0.4, 3)
+hr <- 1.5
+incid0 <- 0.05
+lambda <- c(incid0, incid0 * hr, incid0 * hr^2)
+shape <- 1
+scale <- lambda^(-1/shape)
+perc.obs <- 0.10
+time.cens <- qweibull(perc.obs, mean(shape), mean(scale))
+dsim <- simCNVdataWeibull(n, mu.surrog, sd.surrog, w, lambda, shape, time.cens)
+head(dsim)
+@
+
+The result is a data frame with 4 variables (one additional variable, compared to the Poisson example, that corresponds to censoring indicator), 
+and, as before, as many rows as individuals:
+\begin{itemize}
+\item \texttt{resp}: time to disease (weibull distributed) or censoring (end of follow-up),
+\item \texttt{cens}: censoring indicator (0: without disease at the end of follow-up period, 1: with disease within the follow-up period),
+\item \texttt{cnv}: the real copy number status, which, in practice, will be unknown and not considered in testing the association,
+\item \texttt{surrog}: the CNV intensity signal.
+\end{itemize}
+
+As before, the CNV signal is fitted under a normal mixture distribution with function \texttt{cnv}
+and specifying the ''mclust'' method:
+<<echo=TRUE>>=
+CNV<-cnv(dsim$surrog,mix="mclust")
+CNV
+@
+
+Then, an association model with CNV and the phenotype assuming an additive effect is performed as usual,
+this time specifying \texttt{family="weibull"}, and introducing the censored status using function \texttt{Surv}
+in the left hand side of the formula argument:
+\texttt{CNVassoc} function:
+<<echo=TRUE>>=
+fit<-CNVassoc(Surv(resp,cens)~CNV, data=dsim, family="weibull", model="add")
+coef(summary(fit))
+@
+
+Again, the same generic functions are applicable as for normal, binary traits and poisson distributed phenotype. 
+Note that, now, \texttt{summary} prints ''HR'' instead of ''OR'' (binary) or ''RR'' (poisson).
+
+
+
+
+
+
+\bibliographystyle{plain}
+\bibliography{CNVassoc_vignette}
+
+\end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
