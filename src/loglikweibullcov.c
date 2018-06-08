@@ -133,7 +133,7 @@ SEXP loglikweibullcov(SEXP N, double *par, SEXP P, SEXP Y, SEXP CENS, SEXP WW, S
   SEXP RES, LOGLIKE, SCORE, HESSIAN;
   double *loglike, *sc, *hess;
 
-  PROTECT(RES = allocVector(VECSXP, numpar));
+  PROTECT(RES = allocVector(VECSXP, 3));
   PROTECT(LOGLIKE = allocVector(REALSXP, 1));
   loglike = REAL(LOGLIKE);
   PROTECT(SCORE = allocVector(REALSXP, numpar));

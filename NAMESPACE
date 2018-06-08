@@ -1,4 +1,4 @@
-useDynLib(CNVassoc)
+useDynLib(CNVassoc, .registration = TRUE)
 
 import(
 CNVassocData, 

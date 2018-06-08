@@ -5,16 +5,25 @@ function (x)
         stop("object must be of class 'cghCall'")
     requireNamespace("Biobase", quietly = TRUE)
     requireNamespace("CGHbase", quietly = TRUE)
-    Clone <- Biobase::featureNames(x)
-    Chromo <- CGHbase::chromosomes(x)
-    BPstart <- CGHbase::bpstart(x)
-    BPend <- CGHbase::bpend(x)
-    Calls <- CGHbase::calls(x)
-    Probloss <- CGHbase::probloss(x)
-    Probnorm <- CGHbase::probnorm(x)
-    Probgain <- CGHbase::probgain(x)
+    if (requireNamespace("Biobase", quietly=TRUE)) 
+      Clone <- Biobase::featureNames(x) 
+    else 
+      stop("Biobase is not available")
+    if (requireNamespace("CGHbase", quietly=TRUE)){
+      Chromo <- CGHbase::chromosomes(x)
+      BPstart <- CGHbase::bpstart(x)
+      BPend <- CGHbase::bpend(x)
+      Calls <- CGHbase::calls(x)
+      Probloss <- CGHbase::probloss(x)
+      Probnorm <- CGHbase::probnorm(x)
+      Probgain <- CGHbase::probgain(x)
+      Probamp <- CGHbase::probamp(x)
+    } else 
+      stop("CGHbase is not available")
+    
+    
     colnam <- c(colnames(Probloss), colnames(Probnorm), colnames(Probgain))
-    if (is.null(CGHbase::probamp(x))) {
+    if (is.null(Probamp)) {
         allprob <- c()
         ncl <- ncol(Probnorm)
         for (i in 1:ncl) {
@@ -26,7 +35,6 @@ function (x)
         }
     }
     else {
-        Probamp <- CGHbase::probamp(x)
         colnam <- c(colnam, colnames(Probamp))
         allprob <- c()
         ncl <- ncol(Probnorm)

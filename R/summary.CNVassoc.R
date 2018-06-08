@@ -19,7 +19,7 @@ function (object, ref = 1, alpha = 0.05, ...)
         se <- se[!is.na(se)]
         se <- c(NA, se)
         stat <- beta/se
-        pvalue <- 2 * pnorm(abs(stat), lower=FALSE)
+        pvalue <- 2 * pnorm(abs(stat), lower.tail=FALSE)
         lim.inf <- beta - z * se
         lim.sup <- beta + z * se
         coeff <- cbind(fun(cbind(beta, lim.inf, lim.sup)), se, stat, pvalue)
@@ -29,7 +29,7 @@ function (object, ref = 1, alpha = 0.05, ...)
         beta <- x$coefficients[1:2, 1]
         se <- sqrt(diag(F)[1:2])
         stat <- beta/se
-        pvalue <- 2 * pnorm(abs(stat), lower=FALSE)
+        pvalue <- 2 * pnorm(abs(stat), lower.tail=FALSE)
         lim.inf <- beta - z * se
         lim.sup <- beta + z * se
         coeff <- cbind(fun(cbind(beta, lim.inf, lim.sup)), se, stat, pvalue)
@@ -47,7 +47,7 @@ function (object, ref = 1, alpha = 0.05, ...)
         lim.inf <- beta.cov - z * se.cov
         lim.sup <- beta.cov + z * se.cov
         stat <- beta.cov/se.cov
-        pvalue <- 2 * pnorm(abs(stat), lower=FALSE)
+        pvalue <- 2 * pnorm(abs(stat), lower.tail=FALSE)
         coeff.cov <- cbind(fun(cbind(beta.cov, lim.inf, lim.sup)),
             se.cov, stat, pvalue)
     }

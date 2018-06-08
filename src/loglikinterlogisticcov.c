@@ -119,7 +119,7 @@ SEXP loglikinterlogisticcov(SEXP N, double *par, SEXP Y, SEXP WW, SEXP Q, SEXP C
   SEXP RES, LOGLIKE, SCORE, HESSIAN;
   double *loglike, *sc, *hess;
 
-  PROTECT(RES = allocVector(VECSXP, numpar));
+  PROTECT(RES = allocVector(VECSXP, 3));
   PROTECT(LOGLIKE = allocVector(REALSXP, 1));
   loglike = REAL(LOGLIKE);
   PROTECT(SCORE = allocVector(REALSXP, numpar));
@@ -141,7 +141,7 @@ SEXP loglikinterlogisticcov(SEXP N, double *par, SEXP Y, SEXP WW, SEXP Q, SEXP C
   SET_VECTOR_ELT(RES, 0, LOGLIKE);
   SET_VECTOR_ELT(RES, 1, SCORE);
   SET_VECTOR_ELT(RES, 2, HESSIAN);
-
+  
   for(i = 0; i<numpar; i++)
     free(hessian[i]);
   free(hessian), free(score);
