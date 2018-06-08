@@ -27,4 +27,4 @@ License: GPL (>= 2)
 LazyLoad: yes
 URL: http://www.creal.cat/jrgonzalez/software.htm
 Encoding: latin1
-BuildVignettes: true
+BuildVignettes: false
