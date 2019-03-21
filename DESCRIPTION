@@ -1,6 +1,6 @@
 Package: CNVassoc
 Type: Package
-Title: Association Analysis of CNV Data and Imputed SNPs
+Title: Association analysis of CNVs and imputed SNPs incorporating uncertainty
 Version: 2.4
 Date: 2019-03-21
 Depends: R (>= 3.2.0), mixdist, mclust, survival

@@ -6,7 +6,7 @@ always_allow_html: yes
 CNVassoc
 =========
 
-**_Performing association analysis of CNVs and imputed SNPs incorporating uncertainty_**
+**_Association analysis of CNVs and imputed SNPs incorporating uncertainty_**
 
 
 ```{r setup, include=FALSE}

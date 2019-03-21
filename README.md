@@ -2,7 +2,7 @@
 CNVassoc
 ========
 
-***Performing association analysis of CNVs and imputed SNPs incorporating uncertainty***
+***Association analysis of CNVs and imputed SNPs incorporating uncertainty***
 
 Overview
 --------
