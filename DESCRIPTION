@@ -1,10 +1,11 @@
 Package: CNVassoc
 Type: Package
 Title: Association Analysis of CNV Data and Imputed SNPs
-Version: 2.3
-Date: 2018-06-08
-Depends: R (>= 3.2.0), CNVassocData, mixdist, mclust, survival
-Suggests: xtable, Biobase, CGHbase
+Version: 2.4
+Date: 2019-03-21
+Depends: R (>= 3.2.0), mixdist, mclust, survival
+Imports: parallel
+Suggests: xtable, MASS, Biobase, CGHbase, utils
 Author: Juan R González, Isaac Subirana
 Maintainer: Isaac Subirana <isubirana@imim.es>
 Description: Carries out analysis of common 
@@ -25,6 +26,10 @@ Description: Carries out analysis of common
              created to facilitate the analysis.    
 License: GPL (>= 2)
 LazyLoad: yes
-URL: http://www.creal.cat/jrgonzalez/software.htm
+URL: https://github.com/isglobal-brge/CNVassoc
+biocViews: Clustering, Regression, TimeCourse, Microarray, BatchEffect, Genetics
 Encoding: latin1
-BuildVignettes: false
+BuildVignettes: true
+VignetteBuilder: utils
+ 
+ 

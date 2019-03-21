@@ -18,7 +18,7 @@
 
 \usage{
   getProbs(x)
-  \method{getProbs}{cghCall}(x)
+  %\method{getProbs}{cghCall}(x)
   \method{getProbs}{cnv}(x)
 }
 

@@ -3,13 +3,18 @@ function (x)
 {
     if (!inherits(x, "cghCall"))
         stop("object must be of class 'cghCall'")
-    requireNamespace("Biobase", quietly = TRUE)
-    requireNamespace("CGHbase", quietly = TRUE)
-    if (requireNamespace("Biobase", quietly=TRUE)) 
-      Clone <- Biobase::featureNames(x) 
+    # requireNamespace("Biobase", quietly = TRUE)
+    # requireNamespace("CGHbase", quietly = TRUE)
+    # if (requireNamespace("Biobase", quietly=TRUE) && 'Biobase'%in%installed.packages()[,1])
+
+    #if (require("Biobase"))
+    if (requireNamespace("Biobase", quietly = TRUE))
+      Clone <- Biobase::featureNames(x)
     else 
       stop("Biobase is not available")
-    if (requireNamespace("CGHbase", quietly=TRUE)){
+    # if (requireNamespace("CGHbase", quietly=TRUE) && 'CGHbase'%in%installed.packages()[,1]){
+    #if (require("CGHbase")){
+    if (requireNamespace("CGHbase", quietly = TRUE)) {  
       Chromo <- CGHbase::chromosomes(x)
       BPstart <- CGHbase::bpstart(x)
       BPend <- CGHbase::bpend(x)
@@ -20,8 +25,7 @@ function (x)
       Probamp <- CGHbase::probamp(x)
     } else 
       stop("CGHbase is not available")
-    
-    
+
     colnam <- c(colnames(Probloss), colnames(Probnorm), colnames(Probgain))
     if (is.null(Probamp)) {
         allprob <- c()

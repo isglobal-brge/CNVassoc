@@ -1,10 +1,12 @@
 useDynLib(CNVassoc, .registration = TRUE)
 
+importFrom("utils", "installed.packages")
+
 import(
-CNVassocData, 
 mixdist, 
 mclust, 
-survival
+survival,
+parallel
 )
 
 export(

@@ -1,0 +1,101 @@
+v2.4
+2019-03-21
+- data, and exdata folder with example data frames contained in former CNVassocData incorporated
+
+v2.3
+2018-06-8
+- bug fixed in fastCNVassoc
+- CGHcall, CGHregions, CNVtools and MASS removed from suggested packages (they are not needed). Only xtabl, Biobase and CGHbase remained.
+
+v2.2
+2016-04-12
+- NAMESPACE file: importFrom some functions.
+
+v2.1
+2015-02-26
+- new function, fastCNVinter, to perform epistasis (CNVxCNV or SNPxSNP) association analyses.
+- DESCRIPTION text updated.
+
+v2.0.1
+2013-09-18
+- new mantainer Isaac Subirana <isubirana@imim.es> instead of Juan R Gonz?lez <jrgonzalez@creal.cat>
+- all data sets have been moved to CNVassocData new package.
+- fixed: fastCNVassoc example data set requires parallel package.
+
+v2.0
+2013-07-30
+- new function fastCNVassoc to analize GWAS much quicker using C functions. It works for case-control and cohort studies.
+
+v1.5
+2012-11-06
+- multiCNVassoc: new arguments added (num.copies and cnv.tol).
+- vignette: changed to accomodate new make_cghRaw function from CGHbase package.
+
+V1.4
+2012-09-13
+- changed: call to .Fortran for a base code has been removed (see Brian Ripley's e-mail)
+- getProbsRegions: new argument 'nclass' added.
+- CGH example in the vignette changed in order to be compatible with the new version of CGHcall and CGHregions packages.
+
+v1.3-v1.4
+2012-03-26
+- fixed: problems when checking Windows version
+
+
+v1.1-v1.2
+2012-03-26
+- fixed: problems when checking Windows version
+
+v1.0
+2011-04-26
+- fixed: problems when checking Windows version
+
+v0.8-4
+2010-06-08 
+- changed: cnv function for 'locator' 
+- changed: help files for SimDataCaseControl
+
+v0.8-3
+2010-06-04
+- added: CNVtools as suggested package (Kurt Hornik message)
+
+v0.8-2
+2010-06-04
+- MAIN CHANGE: package submitted to CRAN
+- Ramon's comments and suggestions included
+- fixed some bugs in print.summary.CNVassoc
+
+v0.8-1
+2010-05-13
+- MAIN CHANGE: cnv function incorporates batch effect
+- changed: getQualityScore functions
+
+v0.8-0
+2010-04-14
+- MAIN CHANGE: Right censored Weibull distribution has been included to association model
+- added: new function to simulate time-to-event study (right censored weibull) and CNVs
+
+v0.7-0
+2010-01-29
+- MAIN CHANGE: Poisson distribution has been included to model counts
+- MAIN CHANGE: new function (plotSignal) to make calling manually using 'locator' 
+- added: new function to check whether calling has been performed correctly
+- added: new function to simulate case-control study and CNVs
+- change: several functions (see newFunctions.zip) have been modified to address the new main changes
+
+v0.6-0
+2009-12-14
+- changed mixture.r function to allow user to perform calling step using 'locator' option (after Gaelle's comments)
+- changed plot.cnv to differenciate cases and controls
+
+v0.5-4
+2009-09-01
+- changed how to compute p-values in anova and CNVtest (use lower.tail=FALSE instead of 1-pchiq)
+
+v0.5-3
+2009-07-24
+- fixed CNVassoc function to allow factor variables
+
+v0.5-2
+2009-06-25
+- fixed some bugs in 'mix.r' and 'classCNV.R' functions
