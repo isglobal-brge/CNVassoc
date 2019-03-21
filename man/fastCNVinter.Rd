@@ -66,9 +66,9 @@
 
 \references{
 
-Subirana I, González JR. Interaction association analysis of imputed SNPs in case control and cohort studies. \emph{Genet Epidemiol}, 2015 Jan 22; doi: 10.1002/gepi.21883. [Epub ahead of print] \cr
+Subirana I, Gonz?lez JR. Interaction association analysis of imputed SNPs in case control and cohort studies. \emph{Genet Epidemiol}, 2015 Jan 22; doi: 10.1002/gepi.21883. [Epub ahead of print] \cr
 
-Subirana I, González JR. Genetic Association Analysis and Meta-Analysis of Imputed SNPs in Longitudinal Studies. \emph{Genet Epidemiol}, 2013 Jul;37(5):465-77.   \cr
+Subirana I, Gonz?lez JR. Genetic Association Analysis and Meta-Analysis of Imputed SNPs in Longitudinal Studies. \emph{Genet Epidemiol}, 2013 Jul;37(5):465-77.   \cr
 
 Gonzalez JR, Subirana I, Escaramis G, Peraza S, Caceres A, Estivill X and Armengol L. Accounting for uncertainty when assessing association between copy number and disease: a latent class model. \emph{BMC Bioinformatics}, 2009;10:172. 
 
@@ -93,7 +93,7 @@ require(parallel)
 
 # read imputed SNP probabilities from a file-.
 # Example from SNPTEST software of 500 cases and 500 controls on 200 imputed SNPS.
-fileprobs <- system.file("exdata/SNPTEST.probs",package="CNVassocData")
+fileprobs <- system.file("exdata/SNPTEST.probs",package="CNVassoc")
 
 # build response (500 controls and 500 cases).
 resp<-rep(0:1,each=500)

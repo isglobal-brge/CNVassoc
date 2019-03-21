@@ -24,11 +24,11 @@ An extensive [manual](https://github.com/isglobal-brge/CNVassoc/blob/master/CNVa
 Package installation
 --------------------
 
-Install the **`compareGroups`** package from Github repository by typing:
+Install the **`CNVassoc`** package from Github repository by typing:
 
 ``` r
 library(devtools)
-devtools::install_github(repo = "isubirana/compareGroups")
+devtools::install_github(repo = "isglobal-brge/CNVassoc")
 ```
 
 ``` r
@@ -38,19 +38,19 @@ library(CNVassoc)
 Copy Number Variants
 --------------------
 
-Load example data:
+-   Load example data:
 
 ``` r
 data(dataMLPA)
 ```
 
-Infer number of copies from probe signal values
+-   Infer number of copies from probe signal values
 
 ``` r
 CNV  <-  cnv(x  =  dataMLPA$Gene2,  threshold.0  =  0.01,  mix.method  =  "mixdist")
 ```
 
-Explore signal and copy number inferred
+-   Explore signal and copy number inferred
 
 ``` r
 CNV
@@ -76,7 +76,13 @@ plot(CNV, case.control = factor(dataMLPA$casco, labels=c("controls", "cases")))
 
 ![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
-Association model considering additive effect and adjusting with a covariate
+``` r
+getQualityScore(CNV)
+```
+
+    --Probability of good classification: 0.911332 
+
+-   Association model considering additive effect and adjusting with a covariate
 
 ``` r
 modadd  <-  CNVassoc(casco  ~  CNV + cov,  data  =  dataMLPA,  model  =  "add")
@@ -108,10 +114,10 @@ summary(modadd)
 Perform efficient association analyses of imputed SNPS
 ------------------------------------------------------
 
--   Import genotype probabilities from example data a hundred imputed SNPs
+-   Import genotype probabilities from example data from SNPTEST software consisting of 500 cases and 500 controls on 200 imputed SNPS.
 
 ``` r
-fileprobs <- system.file("exdata/SNPTEST.probs", package = "CNVassocData")
+fileprobs <- system.file("exdata/SNPTEST.probs", package = "CNVassoc")
 ```
 
 -   Fit an association model for each imputed SNP
@@ -143,11 +149,11 @@ References
 ==========
 
 <p>
-Subirana I, Diaz-Uriarte R, Lucas G, Gonzalez JR. CNVassoc: Association analysis of CNV data using R. BMC Med Genomics. 2011 May 24;4:47. doi: 10.1186/1755-8794-4-47. PubMed PMID: 21609482; PubMed Central PMCID: PMC3121578
+Subirana I, Diaz-Uriarte R, Lucas G, Gonzalez JR. <i>CNVassoc: Association analysis of CNV data using R</i>. BMC Med Genomics. 2011 May 24;4:47. doi: 10.1186/1755-8794-4-47. PubMed PMID: 21609482; PubMed Central PMCID: PMC3121578
 </p>
 <p>
-Subirana I, González JR. Genetic association analysis and meta-analysis of imputed SNPs in longitudinal studies. Genet Epidemiol. 2013 Jul;37(5):465-77. doi: 10.1002/gepi.21719. Epub 2013 Apr 17. PubMed PMID: 23595425; PubMed Central PMCID: PMC4273087.
+Subirana I, González JR. <i>Genetic association analysis and meta-analysis of imputed SNPs in longitudinal studies</i>. Genet Epidemiol. 2013 Jul;37(5):465-77. doi: 10.1002/gepi.21719. Epub 2013 Apr 17. PubMed PMID: 23595425; PubMed Central PMCID: PMC4273087.
 </p>
 <p>
-Subirana I, González JR. Interaction association analysis of imputed SNPs in case-control and follow-up studies. Genet Epidemiol. 2015 Mar;39(3):185-96. doi: 10.1002/gepi.21883. Epub 2015 Jan 22. PubMed PMID: 25613387.
+Subirana I, González JR. <i>Interaction association analysis of imputed SNPs in case-control and follow-up studies</i>. Genet Epidemiol. 2015 Mar;39(3):185-96. doi: 10.1002/gepi.21883. Epub 2015 Jan 22. PubMed PMID: 25613387.
 </p>
