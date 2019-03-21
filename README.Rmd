@@ -45,7 +45,7 @@ library(CNVassoc)
 ```
 
 
-## Copy Number Variants
+## Performing accurate association analyses of Copy Number Variants (CNV)
 
 
 - Load example data:
@@ -78,7 +78,7 @@ summary(modadd)
 
 
 
-## Perform efficient association analyses of imputed SNPS
+## Performing efficient association analyses of imputed SNPS
 
 
 - Import genotype probabilities from example data from SNPTEST software consisting of 500 cases and 500 controls on 200 imputed SNPS.

@@ -35,8 +35,8 @@ devtools::install_github(repo = "isglobal-brge/CNVassoc")
 library(CNVassoc)
 ```
 
-Copy Number Variants
---------------------
+Performing accurate association analyses of Copy Number Variants (CNV)
+----------------------------------------------------------------------
 
 -   Load example data:
 
@@ -80,7 +80,7 @@ plot(CNV, case.control = factor(dataMLPA$casco, labels=c("controls", "cases")))
 getQualityScore(CNV)
 ```
 
-    --Probability of good classification: 0.911332 
+    --Probability of good classification: 0.9117571 
 
 -   Association model considering additive effect and adjusting with a covariate
 
@@ -111,8 +111,8 @@ summary(modadd)
     CNVadd               0.0169 -0.0001
     cov                          0.0064
 
-Perform efficient association analyses of imputed SNPS
-------------------------------------------------------
+Performing efficient association analyses of imputed SNPS
+---------------------------------------------------------
 
 -   Import genotype probabilities from example data from SNPTEST software consisting of 500 cases and 500 controls on 200 imputed SNPS.
 
@@ -128,7 +128,7 @@ results <- fastCNVassoc(fileprobs, resp ~ 1, family = "binomial")
 ```
 
     Scanning probs data...
-    Done! Took  0.08 seconds
+    Done! Took  0.07 seconds
 
 -   Adjust p-values by FDR, and show the table by the most significant SNPs
 
