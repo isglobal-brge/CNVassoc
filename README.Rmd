@@ -1,0 +1,120 @@
+---
+output: github_document
+always_allow_html: yes
+---
+
+CNVassoc
+=========
+
+**_Performing association analysis of CNVs and imputed SNPs incorporating uncertainty_**
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, comment="", message=FALSE)
+```
+
+## Overview
+
+**CNVassoc** is an R package that carries out analysis of common Copy Number Variants (CNVs) and imputed Single Nucleotide Polymorphisms (SNPs) in population-based studies. 
+
+It includes tools for estimating association under a series of study designs (case-control, cohort, etc), using several dependent variables (class status, censored data, counts) as response, adjusting for covariates and considering various inheritance models. 
+
+Moreover, it is possible to perform epistasis studies with pairs of CNVs or imputed SNPs.
+
+It has been optimized in order to make feasible the analyses of Genome Wide Association studies (GWAs) with hundreds of thousands of genetic variants (CNVs / imputed SNPs). 
+
+Also, it incorporates functions for inferring copy number (CNV genotype calling). Various classes and methods for generic functions (print, summary, plot, anova, ...) have been created to facilitate the analysis. 
+
+An extensive [manual](https://github.com/isglobal-brge/CNVassoc/blob/master/CNVassoc_vignette.pdf) describing all **CNVassoc** capabilities with real examples is available in package vignette.
+
+<br>
+
+
+## Package installation
+
+
+Install the **`compareGroups`** package from Github repository by typing:
+
+```{r, eval=FALSE}
+library(devtools)
+devtools::install_github(repo = "isubirana/compareGroups")
+```
+
+```{r}
+library(CNVassoc)
+```
+
+
+## Copy Number Variants
+
+
+Load example data:
+
+```{r}
+data(dataMLPA)
+```
+
+
+Infer number of copies from probe signal values
+
+```{r}
+CNV  <-  cnv(x  =  dataMLPA$Gene2,  threshold.0  =  0.01,  mix.method  =  "mixdist")
+```
+
+Explore signal and copy number inferred
+
+```{r}
+CNV
+plot(CNV, case.control = factor(dataMLPA$casco, labels=c("controls", "cases")))
+```
+
+Association model considering additive effect and adjusting with a covariate
+
+```{r}
+modadd  <-  CNVassoc(casco  ~  CNV + cov,  data  =  dataMLPA,  model  =  "add")
+summary(modadd)
+```
+
+
+
+## Perform efficient association analyses of imputed SNPS
+
+
+- Import genotype probabilities from example data a hundred imputed SNPs
+
+```{r}
+fileprobs <- system.file("exdata/SNPTEST.probs", package = "CNVassocData")
+```
+
+- Fit an association model for each imputed SNP
+
+```{r}
+resp <- resp<-rep(0:1, each = 500)
+results <- fastCNVassoc(fileprobs, resp ~ 1, family = "binomial")
+```
+
+- Adjust p-values by FDR, and show the table by the most significant SNPs
+
+```{r}
+results$pvalue <- p.adjust(results$pvalue)
+head(results[order(results$pvalue),])
+```
+
+
+
+# References
+
+
+<p>Subirana I, Diaz-Uriarte R, Lucas G, Gonzalez JR. CNVassoc: Association
+analysis of CNV data using R. BMC Med Genomics. 2011 May 24;4:47. doi:
+10.1186/1755-8794-4-47. PubMed PMID: 21609482; PubMed Central PMCID: PMC3121578</p>
+
+<p>Subirana I, González JR. Genetic association analysis and meta-analysis of
+imputed SNPs in longitudinal studies. Genet Epidemiol. 2013 Jul;37(5):465-77.
+doi: 10.1002/gepi.21719. Epub 2013 Apr 17. PubMed PMID: 23595425; PubMed Central 
+PMCID: PMC4273087.</p>
+
+<p>Subirana I, González JR. Interaction association analysis of imputed SNPs in
+case-control and follow-up studies. Genet Epidemiol. 2015 Mar;39(3):185-96. doi: 
+10.1002/gepi.21883. Epub 2015 Jan 22. PubMed PMID: 25613387.</p>
+
