@@ -1,6 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^CNVassoc_vignette.pdf$
+^CNVassoc_vignette.html$
 ^README.Rmd$
+^inst/exdata/SNPTESToriginal\.probs$
+^inst/exdata/read_SNPTEST\.R$
+^README_files$
+^vignettes/CNVassoc_vignette.Rnw$
 
 

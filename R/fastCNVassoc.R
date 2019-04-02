@@ -72,29 +72,31 @@ fastCNVassoc <- function(probs, formula, data, model = "additive",
 
     # PROBS
     if (is.character(probs)){
-      cat("Scanning probs data...\n")
-      read.st <- system.time(PROBS <- scan(probs,what="character",sep="\n",quiet=TRUE))[3]
-      cat("Done! Took ",read.st,"seconds\n\n")
-      nCNVs<-length(PROBS)
+      if (length(grep("\\.fst$",probs))>0){ #fst format
+        cat("Scanning .fst data...\n")
+        read.st <- system.time(PROBS <- read_fst(probs))[3]
+        cat("Done! Took ",read.st,"seconds\n\n")   
+      } else { #.probs format
+        cat("Reading .probs data...\n")
+        read.st <- system.time(PROBS <- read_table2(probs, col_names = FALSE))[3]
+        cat("Done! Took ",read.st,"seconds\n\n")     
+      }
     } else {
-      if (is.matrix(probs) || is.data.frame(probs))
-        PROBS<-as.matrix(probs)  
-      else
+      if (!(is.matrix(probs) || is.data.frame(probs)))
         stop(" 'probs' must be a character (file) or a matrix or a data.frame")        
-      nCNVs<-nrow(PROBS)
+      PROBS <- probs
     }
-    
+    if (colskip>0)
+      PROBS<-PROBS[,-(1:colskip),drop=FALSE]
+    PROBS<-as.matrix(PROBS)
+    nCNVs<-NROW(PROBS)
+
     # RUN
     if (multicores==0){  # no use of parallel package
       ans<-lapply(1:nCNVs, function(i){
         if (verbose)
           cat("Iteration ",i,"\n")      
-        if (is.character(probs)){
-          PROBS.i<-strsplit(PROBS[i],split=" ")[[1]]
-        }else
-          PROBS.i<-PROBS[i,]
-        if (colskip>0)
-          PROBS.i<-PROBS.i[-(1:colskip)]
+        PROBS.i<-PROBS[i,]
         WW<-matrix(as.double(PROBS.i),nrow=nclass)
         if (nCov > 0){
           if (family=="binomial")
@@ -122,12 +124,7 @@ fastCNVassoc <- function(probs, formula, data, model = "additive",
       ans<-parallel::mclapply(1:nCNVs, function(i){
         if (verbose)
           cat("Iteration",i,"\n")      
-        if (is.character(probs)){
-          PROBS.i<-strsplit(PROBS[i],split=" ")[[1]]
-        } else
-          PROBS.i<-PROBS[i,]
-        if (colskip>0)
-          PROBS.i<-PROBS.i[-(1:colskip)]
+        PROBS.i<-PROBS[i,]
         WW<-matrix(as.double(PROBS.i),nrow=nclass)
         if (nCov > 0){
           if (family=="binomial")

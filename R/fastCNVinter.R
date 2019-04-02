@@ -72,17 +72,25 @@ fastCNVinter <- function(probs, formula, data, model = "additive",
 
     # PROBS
     if (is.character(probs)){
-      cat("Scanning probs data...\n")
-      read.st <- system.time(PROBS <- scan(probs,what="character",sep="\n",quiet=TRUE))[3]
-      cat("Done! Took ",read.st,"seconds\n\n")
-      nCNVs<-length(PROBS)
+      if (length(grep("\\.fst$",probs))>0){ #fst format
+        cat("Scanning .fst data...\n")
+        read.st <- system.time(PROBS <- read_fst(probs))[3]
+        cat("Done! Took ",read.st,"seconds\n\n")   
+      } else { #.probs format
+        cat("Reading .probs data...\n")
+        read.st <- system.time(PROBS <- read_table2(probs, col_names = FALSE))[3]
+        cat("Done! Took ",read.st,"seconds\n\n")     
+      }
     } else {
-      if (is.matrix(probs) || is.data.frame(probs))
-        PROBS<-as.matrix(probs)  
-      else
+      if (!(is.matrix(probs) || is.data.frame(probs)))
         stop(" 'probs' must be a character (file) or a matrix or a data.frame")        
-      nCNVs<-nrow(PROBS)
+      PROBS <- probs
     }
+    if (colskip>0)
+      PROBS<-PROBS[,-(1:colskip),drop=FALSE]
+    PROBS<-as.matrix(PROBS)
+    nCNVs<-NROW(PROBS)
+
     mm<-outer(1:nCNVs,1:nCNVs,paste,sep=",")
     mm<-mm[upper.tri(mm)]
     
@@ -93,17 +101,8 @@ fastCNVinter <- function(probs, formula, data, model = "additive",
         j<-as.integer(strsplit(index,split=",")[[1]][2])
         if (verbose)
           cat("Pair ",index,"\n")      
-        if (is.character(probs)){
-          PROBS.i<-strsplit(PROBS[i],split=" ")[[1]]
-          PROBS.j<-strsplit(PROBS[j],split=" ")[[1]]
-        }else{
-          PROBS.i<-PROBS[i,]
-          PROBS.j<-PROBS[j,]
-        }
-        if (colskip>0){
-          PROBS.i<-PROBS.i[-(1:colskip)]
-          PROBS.j<-PROBS.j[-(1:colskip)]
-        }
+        PROBS.i<-PROBS[i,]
+        PROBS.j<-PROBS[j,]
         WW.i<-matrix(as.double(PROBS.i),nrow=nclass)
         WW.j<-matrix(as.double(PROBS.j),nrow=nclass)
         WW<- .Call("outerC",as.integer(N),t(WW.i),t(WW.j))
@@ -135,17 +134,8 @@ fastCNVinter <- function(probs, formula, data, model = "additive",
         j<-as.integer(strsplit(index,split=",")[[1]][2])
         if (verbose)
           cat("Pair ",index,"\n")    
-        if (is.character(probs)){
-          PROBS.i<-strsplit(PROBS[i],split=" ")[[1]]
-          PROBS.j<-strsplit(PROBS[j],split=" ")[[1]]
-        } else {
-          PROBS.i<-PROBS[i,]
-          PROBS.j<-PROBS[j,]
-        }
-        if (colskip>0){
-          PROBS.i<-PROBS.i[-(1:colskip)]
-          PROBS.j<-PROBS.j[-(1:colskip)]
-        }
+        PROBS.i<-PROBS[i,]
+        PROBS.j<-PROBS[j,]
         WW.i<-matrix(as.double(PROBS.i),nrow=nclass)
         WW.j<-matrix(as.double(PROBS.j),nrow=nclass)
         WW<- .Call("outerC",as.integer(N),t(WW.i),t(WW.j))

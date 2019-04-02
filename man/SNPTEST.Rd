@@ -6,7 +6,7 @@
 \usage{data(SNPTEST)}
 \description{
 
-Case-control data for 200 individuals and 500 SNPs using SNPTEST format (e.g. probabilities of AA, AB and BB genotypes
+Case-control data for 200 individuals (100 cases and 100 controls) and 50 SNPs using SNPTEST format (e.g. probabilities of AA, AB and BB genotypes)
 
 }
 
@@ -16,7 +16,7 @@ Two objects: cases and controls. Each object is a matrix with 100 rows and 1505 
 
 \source{
 
- \url{http://www.stats.ox.ac.uk/~marchini/software/gwas/snptest.html}
+ \url{https://mathgen.stats.ox.ac.uk/genetics_software/snptest/snptest.html}
 
 }
 

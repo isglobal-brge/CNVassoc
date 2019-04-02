@@ -4,8 +4,8 @@ Title: Association analysis of CNVs and imputed SNPs incorporating uncertainty
 Version: 2.4
 Date: 2019-03-21
 Depends: R (>= 3.2.0), mixdist, mclust, survival
-Imports: parallel
-Suggests: xtable, MASS, Biobase, CGHbase, utils
+Imports: parallel, readr, fst
+Suggests: xtable, MASS, Biobase, CGHbase, utils, BiocStyle, knitr, rmarkdown
 Author: Juan R González, Isaac Subirana
 Maintainer: Isaac Subirana <isubirana@imim.es>
 Description: Carries out analysis of common 
@@ -30,6 +30,8 @@ URL: https://github.com/isglobal-brge/CNVassoc
 biocViews: Clustering, Regression, TimeCourse, Microarray, BatchEffect, Genetics
 Encoding: latin1
 BuildVignettes: true
-VignetteBuilder: utils
+VignetteBuilder: knitr
+
+
  
  

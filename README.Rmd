@@ -25,7 +25,7 @@ It has been optimized in order to make feasible the analyses of Genome Wide Asso
 
 Also, it incorporates functions for inferring copy number (CNV genotype calling). Various classes and methods for generic functions (print, summary, plot, anova, ...) have been created to facilitate the analysis. 
 
-An extensive [manual](https://github.com/isglobal-brge/CNVassoc/blob/master/CNVassoc_vignette.pdf) describing all **CNVassoc** capabilities with real examples is available in package vignette.
+An extensive [manual](http://htmlpreview.github.io/?https://github.com/isglobal-brge/CNVassoc/blob/master/CNVassoc_vignette.html) describing all **CNVassoc** capabilities with real examples is available in package vignette.
 
 <br>
 

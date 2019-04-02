@@ -1,6 +1,8 @@
 useDynLib(CNVassoc, .registration = TRUE)
 
 importFrom("utils", "installed.packages")
+importFrom("readr", "read_table2")
+importFrom("fst", "read_fst")
 
 import(
 mixdist, 

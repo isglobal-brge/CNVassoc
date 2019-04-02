@@ -17,7 +17,7 @@ It has been optimized in order to make feasible the analyses of Genome Wide Asso
 
 Also, it incorporates functions for inferring copy number (CNV genotype calling). Various classes and methods for generic functions (print, summary, plot, anova, ...) have been created to facilitate the analysis.
 
-An extensive [manual](https://github.com/isglobal-brge/CNVassoc/blob/master/CNVassoc_vignette.pdf) describing all **CNVassoc** capabilities with real examples is available in package vignette.
+An extensive [manual](http://htmlpreview.github.io/?https://github.com/isglobal-brge/CNVassoc/blob/master/CNVassoc_vignette.html) describing all **CNVassoc** capabilities with real examples is available in package vignette.
 
 <br>
 
@@ -80,7 +80,7 @@ plot(CNV, case.control = factor(dataMLPA$casco, labels=c("controls", "cases")))
 getQualityScore(CNV)
 ```
 
-    --Probability of good classification: 0.9117571 
+    --Probability of good classification: 0.9081028 
 
 -   Association model considering additive effect and adjusting with a covariate
 
@@ -127,8 +127,8 @@ resp <- resp<-rep(0:1, each = 500)
 results <- fastCNVassoc(fileprobs, resp ~ 1, family = "binomial")
 ```
 
-    Scanning probs data...
-    Done! Took  0.07 seconds
+    Reading .probs data...
+    Done! Took  0.31 seconds
 
 -   Adjust p-values by FDR, and show the table by the most significant SNPs
 
@@ -138,12 +138,12 @@ head(results[order(results$pvalue),])
 ```
 
       variant       beta         se    zscore pvalue iter
-    1       1 0.09876790 0.09356268 1.0556335      1    4
-    2       2 0.03169991 0.12907826 0.2455867      1    4
-    3       3 0.14015045 0.09325322 1.5029020      1    4
-    4       4 0.05238862 0.10868034 0.4820432      1    4
-    5       5 0.16669646 0.09632587 1.7305471      1    4
-    6       6 0.12066040 0.09179177 1.3145013      1    4
+    1       1 0.09876262 0.09356259 1.0555781      1    4
+    2       2 0.03171118 0.12907790 0.2456747      1    4
+    3       3 0.14015608 0.09325326 1.5029617      1    4
+    4       4 0.05239490 0.10868035 0.4821010      1    4
+    5       5 0.16669960 0.09632611 1.7305754      1    4
+    6       6 0.12066259 0.09179185 1.3145239      1    4
 
 References
 ==========

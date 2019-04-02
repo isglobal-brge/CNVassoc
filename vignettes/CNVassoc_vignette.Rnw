@@ -788,7 +788,7 @@ The data of the following example can be downloaded freely from the SNPTEST soft
 of 500 cases and 500 controls, and 100 SNPs. For all of the SNPs the probabilities of each genotype is given, not the genotype itself,
 simulating having been obtained from IMPUTE.  The names of the SNPs have been masked, as also the name of the disease. \\
 
-Let's load the data. There are 2 data frames, one for cases and the other for controls
+Let's load the data. There are 2 data frames, one for cases and the other for controls. For this example we have selected 50 of the 100 imputed SNPS.
 <<echo=TRUE>>=
 data(SNPTEST)
 dim(cases)
@@ -836,7 +836,7 @@ to the same SNP.\\
 
 First in order to use \texttt{CNVassoc} certain preliminary data management steps are needed.
 The goal is to have one matrix of probabilities with 3 columns corresponding to the 3 genotypes and 1000 individuals (500 cases plus 500 controls),
-for each of the 100 SNPs.
+for each of the 50 SNPs.
 
 <<echo=TRUE>>=
 nSNP <- nrow(cases)
@@ -849,7 +849,7 @@ ncol = 3, byrow = TRUE)
 })
 @
 
-Now \texttt{probs} is a list of 100 components, each one containing the probability matrix of each SNP, and the first 500 rows of each matrix
+Now \texttt{probs} is a list of 50 components, each one containing the probability matrix of each SNP, and the first 500 rows of each matrix
 refers to the cases and the rest to the controls.
 
 In this point, we can use \texttt{multiCNVassoc} as shown in section \ref{section-CNV from aCGH}, to perform an association
