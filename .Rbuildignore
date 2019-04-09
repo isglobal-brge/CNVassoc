@@ -6,5 +6,5 @@
 ^inst/exdata/read_SNPTEST\.R$
 ^README_files$
 ^vignettes/CNVassoc_vignette.Rnw$
-
+^replace_4blanks.R$
 

@@ -1,3 +1,1 @@
-getProbs <-
-function (x)
-UseMethod("getProbs")
+getProbs <- function(x) UseMethod("getProbs")

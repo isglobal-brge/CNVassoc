@@ -1,5 +1,3 @@
-useDynLib(CNVassoc, .registration = TRUE)
-
 importFrom("utils", "installed.packages")
 importFrom("readr", "read_table2")
 importFrom("fst", "read_fst")
@@ -32,9 +30,14 @@ fastCNVassoc,
 fastCNVinter
 )
 
-importFrom("graphics", "abline", "axis", "barplot", "layout", "legend", "lines", "locator", "par", "plot", "points", "polygon")
+importFrom("graphics", "abline", "axis", "barplot", "layout", "legend", 
+"lines", "locator", "par", "plot", "points", "polygon")
 
-importFrom("stats", "as.formula", "coef", "contrasts", "cor", "dbinom", "density", "dnorm", "dpois", "dweibull", "glm", "glm.control", "integrate", "logLik", "model.matrix", "model.response", "p.adjust", "p.adjust.methods", "pchisq", "pnorm", "printCoefmat", "pweibull", "qnorm", "rbinom", "rmultinom", "rnorm", "rpois", "rweibull", "sd")
+importFrom("stats", "as.formula", "coef", "contrasts", "cor", "dbinom", 
+"density", "dnorm", "dpois", "dweibull", "glm", "glm.control", 
+"integrate", "logLik", "model.matrix", "model.response", "p.adjust", 
+"p.adjust.methods", "pchisq", "pnorm", "printCoefmat", "pweibull", 
+"qnorm", "rbinom", "rmultinom", "rnorm", "rpois", "rweibull", "sd")
 
 
 S3method(print, cnv)
@@ -57,27 +60,4 @@ S3method(getProbs, cghCall)
 S3method(getProbs, cnv)
 
 S3method(subset, cnv)
-
-# not exported:
-  # assocCNV.i
-  # classCNV
-  # EMlogistic
-  # EMnorm
-  # getQualityScoreDefault
-  # hessianLinear
-  # hessianLogistic
-  # linear.fit
-  # logistic.fit
-  # logLike.logistic
-  # logLike.norm
-  # matrix2vector
-  # mix
-  # NRlogistic
-  # NRnorm
-  # plot.cnv.intensities
-  # plot.cnv.norm
-  # vector2matrix
-  # is.quantitative
-  # getProbsRegions.i
-  # Others ...
 

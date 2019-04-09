@@ -1,3 +1,1 @@
-getQualityScore <- 
-function (x, ...) 
-  UseMethod("getQualityScore")
+getQualityScore <- function(x, ...) UseMethod("getQualityScore")

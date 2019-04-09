@@ -1,11 +1,11 @@
 Package: CNVassoc
 Type: Package
 Title: Association analysis of CNVs and imputed SNPs incorporating uncertainty
-Version: 2.4
+Version: 2.4.0
 Date: 2019-03-21
-Depends: R (>= 3.2.0), mixdist, mclust, survival
-Imports: parallel, readr, fst
-Suggests: xtable, MASS, Biobase, CGHbase, utils, BiocStyle, knitr, rmarkdown
+Depends: R (>= 3.5.0), mixdist, mclust, survival
+Imports: parallel, readr, fst, utils, graphics, stats
+Suggests: MASS, Biobase, CGHbase, CGHregions, BiocStyle, knitr, rmarkdown, testthat
 Author: Juan R González, Isaac Subirana
 Maintainer: Isaac Subirana <isubirana@imim.es>
 Description: Carries out analysis of common 
@@ -27,11 +27,7 @@ Description: Carries out analysis of common
 License: GPL (>= 2)
 LazyLoad: yes
 URL: https://github.com/isglobal-brge/CNVassoc
-biocViews: Clustering, Regression, TimeCourse, Microarray, BatchEffect, Genetics
+biocViews: Clustering, Regression, BatchEffect, Genetics, GenomeWideAssociation
 Encoding: latin1
 BuildVignettes: true
 VignetteBuilder: knitr
-
-
- 
- 

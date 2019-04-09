@@ -1,4 +1,3 @@
-getProbs.cnv <-
-function(x){
-  attr(x, "probabilities")
+getProbs.cnv <- function(x) {
+        attr(x, "probabilities")
 }

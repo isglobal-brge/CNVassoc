@@ -1,3 +1,3 @@
-is.cnv<-function(obj) {
-  inherits(obj,"cnv")
+is.cnv <- function(obj) {
+        inherits(obj, "cnv")
 }

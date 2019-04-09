@@ -3,42 +3,36 @@
 \alias{getProbs}
 \alias{getProbs.cghCall}
 \alias{getProbs.cnv}
-
-
 \title{
- Get posterior probabilities from an object of class 'cnv' or 'CGHcall'
+    Get posterior probabilities from an object of class 'cnv' or 'CGHcall'
 }
-
-
 \description{
- This function creates a list where each component correspond to a given probe. 
- Any component contains the posterior probabilities obtained from CGHcall algorithm.
+This function creates a list where each component correspond to a given probe. 
+Any component contains the posterior probabilities obtained from CGHcall 
+algorithm.
 }
-
-
 \usage{
-  getProbs(x)
-  %\method{getProbs}{cghCall}(x)
-  \method{getProbs}{cnv}(x)
+getProbs(x)
+%\method{getProbs}{cghCall}(x)
+\method{getProbs}{cnv}(x)
 }
-
 \arguments{
- \item{x}{an object of class 'CGHcall' or 'cnv'}
+    \item{x}{an object of class 'CGHcall' or 'cnv'}
 }
-
-
 \value{
-A list where each component correspond to a given probe. Any component contains the posterior probabilities obtained from CGHcall algorithm
+A list where each component correspond to a given probe. Any component contains 
+the posterior probabilities obtained from CGHcall algorithm
 }
-
 \note{
 See vignette for an example.
 }
-
 \author{
- This function was created using a script kindly provided by Mark van de Wiel
+This function was created using a script kindly provided by Mark van de Wiel
 }
-
-
+\examples{
+data(dataMLPA)
+CNV <- cnv(x = dataMLPA$Gene2, threshold.0 = 0.01, mix.method = "mixdist")
+probs <- getProbs(CNV)
+head(probs)
+}
 \keyword{utilities}
-
